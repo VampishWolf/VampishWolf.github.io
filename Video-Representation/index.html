@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Video Catalog</title>
+  
+  
+    <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/css?family=Unica+One'>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+</head>
+
+<body>
+  <div class="container">
+  <h1 class="heading" data-target-resolver></h1>
+</div>
+<script src="script.js"  class="header" id="myHeader"></script>  
+<script>
+window.onscroll = function() {myFunction()};
+
+var header = document.getElementById("myHeader");
+var sticky = header.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset > sticky) {
+    header.classList.add("sticky");
+  } else {
+    header.classList.remove("sticky");
+  }
+}
+</script>
+    <div class="content">
+      <video width="440" height="275" controls preload="metadata">
+        <source src="https://n4b9c5t6.hostrycdn.com/assets/Template1.mp4" type="video/mp4">
+    </video>
+    <video width="440" height="275" controls preload="metadata">
+        <source src="https://n4b9c5t6.hostrycdn.com/assets/Template3.mp4" type="video/mp4">
+    </video>
+    <video width="440" height="275" controls preload="metadata">
+        <source src="https://n4b9c5t6.hostrycdn.com/assets/Template2.mp4" type="video/mp4">
+    </video>
+    <div class="text">
+        <p>This is a local webpage with a collection of sample videos for You.</p>
+        <p>Click on the play button and go Full Screen!</p>
+        <p id="smiley">😄</p>
+   </div>
+   <p style="font-size: medium; color: antiquewhite;">Copyright © 2020 India, All rights reserved.</p>
+	</div>
+</body>
+</html>

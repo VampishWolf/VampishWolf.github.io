@@ -1,0 +1,56 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  html,
+  body {
+    background-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/318335/motion-bg.jpg);
+    height: 100%;
+    margin: 0;
+    font-family: 'Unica One', sans-serif;
+    background: #111;
+  }
+  
+  .container {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    height: 100px;
+    padding: 1rem;
+    padding-top: 2em;
+  }
+  
+  .heading {
+    color: #eee;
+    font-size: 1.5rem;
+    font-weight: 100;
+    text-transform: uppercase;
+  }
+  
+  
+  .videos{
+    min-width: 50px;
+    text-align: center;
+    align-content: center;
+  }
+      
+  .sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+  }
+  .sticky + .content {
+    padding-top: 102px;
+  }
+  .content {
+      text-align: center;
+  }
+  .text {
+      color: antiquewhite;
+      font-size: large;
+      margin-top: 6%;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif ;
+  }
+  #smiley {
+      font-size: x-large;
+  }
