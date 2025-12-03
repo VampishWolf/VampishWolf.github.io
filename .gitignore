@@ -2,6 +2,10 @@
 **/dist/
 **/node_modules/
 
+# QR Code Crafter source (keep source code but not dependencies)
+qr-code-crafter-src/node_modules/
+qr-code-crafter-src/.deploy-trigger
+
 # OS files
 .DS_Store
 **/.DS_Store
