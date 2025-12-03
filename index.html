@@ -220,8 +220,11 @@
         </div>
 
         <footer>
-            <p>&copy; 2024 VampishWolf</p>
+            <p>&copy; <span id="year"></span> VampishWolf</p>
         </footer>
     </div>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
