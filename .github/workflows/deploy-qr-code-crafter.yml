@@ -27,12 +27,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: qr-code-crafter/package-lock.json
 
       - name: Install dependencies
         working-directory: qr-code-crafter
-        run: npm ci
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build
         working-directory: qr-code-crafter
