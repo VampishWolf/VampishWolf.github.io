@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: 210 11% 98%; /* #F9FAFB */
+  --foreground: 222 84% 5%; /* #0F172A */
+  --muted: 220 13% 95%; /* #F1F5F9 */
+  --muted-foreground: 215 16% 47%; /* #64748B */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 222 84% 5%; /* #0F172A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 222 84% 5%; /* #0F172A */
+  --border: 220 13% 91%; /* #E2E8F0 */
+  --input: 220 13% 91%; /* #E2E8F0 */
+  --primary: 210 79% 46%; /* #1976D2 */
+  --primary-foreground: 210 40% 98%; /* #F0F9FF */
+  --secondary: 210 40% 26%; /* #424242 */
+  --secondary-foreground: 0 0% 98%; /* #F8FAFC */
+  --accent: 120 61% 50%; /* #4CAF50 */
+  --accent-foreground: 0 0% 98%; /* #F8FAFC */
+  --destructive: 0 84% 60%; /* #F44336 */
+  --destructive-foreground: 0 0% 98%; /* #F8FAFC */
+  --ring: 210 79% 46%; /* #1976D2 */
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 84% 5%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F0F9FF */
+  --muted: 217 32% 17%; /* #1E293B */
+  --muted-foreground: 215 16% 57%; /* #94A3B8 */
+  --popover: 222 84% 5%; /* #0F172A */
+  --popover-foreground: 210 40% 98%; /* #F0F9FF */
+  --card: 222 84% 5%; /* #0F172A */
+  --card-foreground: 210 40% 98%; /* #F0F9FF */
+  --border: 217 32% 17%; /* #1E293B */
+  --input: 217 32% 17%; /* #1E293B */
+  --primary: 210 79% 46%; /* #1976D2 */
+  --primary-foreground: 210 40% 98%; /* #F0F9FF */
+  --secondary: 217 32% 17%; /* #1E293B */
+  --secondary-foreground: 210 40% 98%; /* #F0F9FF */
+  --accent: 120 61% 50%; /* #4CAF50 */
+  --accent-foreground: 0 0% 98%; /* #F8FAFC */
+  --destructive: 0 62% 30%; /* #991B1B */
+  --destructive-foreground: 0 0% 98%; /* #F8FAFC */
+  --ring: 210 79% 46%; /* #1976D2 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-['Inter',sans-serif] antialiased;
+  }
+}
