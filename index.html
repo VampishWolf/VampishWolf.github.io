@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Web Projects</title>
+    <meta name="description" content="Collection of web development projects including QR code generator, Google homepage replica, games, and more.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .project-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-card h2 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .project-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 3rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 My Web Projects</h1>
+            <p class="subtitle">A collection of web applications and experiments</p>
+        </header>
+
+        <div class="projects-grid">
+            <!-- QR Code Crafter -->
+            <a href="/qr-code-crafter/" class="project-card">
+                <div class="project-icon">📱</div>
+                <h2>QR Code Crafter</h2>
+                <p>Generate professional QR codes instantly for any text or URL. Free QR code generator with multiple formats and sizes.</p>
+                <div class="project-tags">
+                    <span class="tag">React</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Vite</span>
+                    <span class="tag">Tailwind CSS</span>
+                </div>
+            </a>
+
+            <!-- Google Replica -->
+            <a href="/google-replica-TOP-master/" class="project-card">
+                <div class="project-icon">🔍</div>
+                <h2>Google Homepage Replica</h2>
+                <p>A pixel-perfect recreation of the Google homepage, showcasing HTML and CSS fundamentals.</p>
+                <div class="project-tags">
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                    <span class="tag">Responsive</span>
+                </div>
+            </a>
+
+            <!-- Rock Paper Scissors -->
+            <a href="/rock-paper-scissor-game/" class="project-card">
+                <div class="project-icon">✊</div>
+                <h2>Rock Paper Scissors Game</h2>
+                <p>Classic rock-paper-scissors game with a clean interface. Play against the computer!</p>
+                <div class="project-tags">
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                </div>
+            </a>
+
+            <!-- Video Representation -->
+            <a href="/video-representation/" class="project-card">
+                <div class="project-icon">🎥</div>
+                <h2>Video Representation</h2>
+                <p>Interactive video player and representation project demonstrating media handling capabilities.</p>
+                <div class="project-tags">
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">HTML5</span>
+                    <span class="tag">CSS</span>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 VampishWolf | Built with passion for web development</p>
+        </footer>
+    </div>
+</body>
+</html>
