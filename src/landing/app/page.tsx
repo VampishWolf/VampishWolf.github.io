@@ -1,65 +1,87 @@
-import Image from "next/image";
+import Link from "next/link";
+
+const projects = [
+  {
+    number: "01",
+    title: "QR Code Crafter",
+    href: "/qr-code-crafter/",
+    description: "Generate professional QR codes instantly for any text or URL. Free QR code generator with multiple formats and sizes.",
+    tags: ["React", "TypeScript", "Vite", "Tailwind CSS"],
+  },
+  {
+    number: "02",
+    title: "Invoice Crafter",
+    href: "/invoice-crafter/",
+    description: "Professional invoice generator with PDF export, multiple currencies, live preview, and customizable templates for freelancers and businesses.",
+    tags: ["JavaScript", "jsPDF", "HTML", "CSS"],
+  },
+  {
+    number: "03",
+    title: "Google Homepage Replica",
+    href: "/google-replica-TOP-master/",
+    description: "A pixel-perfect recreation of the Google homepage, showcasing HTML and CSS fundamentals.",
+    tags: ["HTML", "CSS", "Responsive"],
+  },
+  {
+    number: "04",
+    title: "Rock Paper Scissors",
+    href: "/rock-paper-scissor-game/",
+    description: "Classic rock-paper-scissors game with a clean interface. Play against the computer.",
+    tags: ["JavaScript", "HTML", "CSS"],
+  },
+  {
+    number: "05",
+    title: "Video Library",
+    href: "/video-library/",
+    description: "Interactive video player and representation project demonstrating media handling capabilities.",
+    tags: ["JavaScript", "HTML5", "CSS"],
+  },
+];
+
+function ProjectCard({ number, title, href, description, tags }: typeof projects[0]) {
+  return (
+    <Link
+      href={href}
+      className="block py-8 border-b border-zinc-800 transition-all duration-200 hover:pl-4 hover:bg-white/[0.02] group"
+    >
+      <div className="flex items-center gap-4 mb-2 max-md:flex-col max-md:items-start max-md:gap-1">
+        <span className="text-sm text-zinc-600 font-normal min-w-10 max-md:min-w-0">{number}</span>
+        <h2 className="text-2xl font-normal text-zinc-400 transition-colors duration-200 group-hover:text-white">
+          {title}
+        </h2>
+      </div>
+      <p className="text-zinc-500 text-[0.95rem] ml-14 mb-3 max-md:ml-0">{description}</p>
+      <div className="flex flex-wrap gap-3 ml-14 max-md:ml-0">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="text-xs text-zinc-500 uppercase tracking-wider font-normal before:content-['·'] before:mr-2 before:text-zinc-700"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    </Link>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="max-w-[900px] mx-auto px-8 py-16 max-md:px-4 max-md:py-8">
+      <header className="mb-16 border-b border-zinc-700 pb-8">
+        <h1 className="text-4xl font-light tracking-tight mb-2 max-md:text-3xl">VampishWolf</h1>
+        <p className="text-base text-zinc-500 font-light">Web Developer / Creative Technologist</p>
+      </header>
+
+      <div className="flex flex-col">
+        {projects.map((project) => (
+          <ProjectCard key={project.number} {...project} />
+        ))}
+      </div>
+
+      <footer className="mt-16 pt-8 border-t border-zinc-800 text-center text-zinc-600 text-sm">
+        <p>&copy; {new Date().getFullYear()} VampishWolf</p>
+      </footer>
     </div>
   );
 }
