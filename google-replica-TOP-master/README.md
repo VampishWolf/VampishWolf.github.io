@@ -1,5 +1,21 @@
-# This repository consists of a replica of Google Homepage developed in HTML, CSS.
+# Google Homepage Replica
 
-#### Clone it, Open it, Have fun! Maybe remake it or change it!
+A pixel-perfect recreation of the Google homepage, showcasing HTML and CSS fundamentals.
 
-#### This project was made during the course of development with TheOdinProject - TOP
+**Live Demo:** [vampishwolf.github.io/google-replica-TOP-master](https://vampishwolf.github.io/google-replica-TOP-master/)
+
+## About
+
+This project was created as part of The Odin Project (TOP) curriculum to practice HTML and CSS skills.
+
+## Features
+
+- Accurate recreation of Google's homepage design
+- Responsive layout
+- Clean, semantic HTML
+- CSS styling matching Google's aesthetic
+
+## Technologies
+
+- HTML
+- CSS

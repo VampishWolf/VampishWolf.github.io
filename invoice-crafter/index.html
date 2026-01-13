@@ -431,11 +431,11 @@
             </div>
             <div class="section">
                 <div class="form-group">
-                    <label>Invoice Date</label>
+                    <label>Issued</label>
                     <input type="date" id="invoiceDate">
                 </div>
                 <div class="form-group">
-                    <label>Due Date</label>
+                    <label>Due</label>
                     <input type="date" id="dueDate">
                 </div>
             </div>
@@ -537,6 +537,11 @@
             return currencySymbols[currency] || '$';
         }
 
+        // Format number with commas
+        function formatAmount(num) {
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
         // Update currency display throughout the invoice
         function updateCurrency() {
             calculateTotals();
@@ -549,6 +554,28 @@
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 30);
         document.getElementById('dueDate').valueAsDate = dueDate;
+
+        // Set minimum due date to issue date
+        document.getElementById('dueDate').min = document.getElementById('invoiceDate').value;
+
+        // Validate due date is not before issue date
+        document.getElementById('invoiceDate').addEventListener('change', function() {
+            const issueDate = this.value;
+            const dueDateInput = document.getElementById('dueDate');
+            dueDateInput.min = issueDate;
+
+            if (dueDateInput.value && dueDateInput.value < issueDate) {
+                dueDateInput.value = issueDate;
+            }
+        });
+
+        document.getElementById('dueDate').addEventListener('change', function() {
+            const issueDate = document.getElementById('invoiceDate').value;
+            if (this.value && issueDate && this.value < issueDate) {
+                this.value = issueDate;
+                alert('Due date cannot be before the issue date.');
+            }
+        });
 
         // Generate default invoice number
         document.getElementById('invoiceNumber').value = 'EC-' + Date.now().toString().slice(-6);
@@ -597,7 +624,7 @@
                 const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
                 const amount = quantity * rate;
 
-                row.querySelector('.item-amount').textContent = symbol + amount.toFixed(2);
+                row.querySelector('.item-amount').textContent = symbol + formatAmount(amount);
                 subtotal += amount;
             });
 
@@ -605,9 +632,9 @@
             const taxAmount = (subtotal * taxRate) / 100;
             const grandTotal = subtotal + taxAmount;
 
-            document.getElementById('subtotal').textContent = symbol + subtotal.toFixed(2);
-            document.getElementById('taxAmount').textContent = symbol + taxAmount.toFixed(2);
-            document.getElementById('grandTotal').textContent = symbol + grandTotal.toFixed(2);
+            document.getElementById('subtotal').textContent = symbol + formatAmount(subtotal);
+            document.getElementById('taxAmount').textContent = symbol + formatAmount(taxAmount);
+            document.getElementById('grandTotal').textContent = symbol + formatAmount(grandTotal);
         }
 
         function createCleanDocumentView() {
@@ -673,9 +700,9 @@
                         <div style="font-weight: 500;">${data.currency || 'USD ($)'}</div>
                     </div>
                     <div>
-                        <div style="color: #666; font-size: 0.85rem; margin-bottom: 0.25rem;">Invoice Date</div>
+                        <div style="color: #666; font-size: 0.85rem; margin-bottom: 0.25rem;">Issued</div>
                         <div style="font-weight: 500;">${data.invoiceDate ? new Date(data.invoiceDate).toLocaleDateString() : ''}</div>
-                        <div style="color: #666; font-size: 0.85rem; margin-top: 0.75rem; margin-bottom: 0.25rem;">Due Date</div>
+                        <div style="color: #666; font-size: 0.85rem; margin-top: 0.75rem; margin-bottom: 0.25rem;">Due</div>
                         <div style="font-weight: 500;">${data.dueDate ? new Date(data.dueDate).toLocaleDateString() : ''}</div>
                     </div>
                 </div>
@@ -856,7 +883,7 @@
             doc.setFontSize(8);
             doc.setTextColor(100, 100, 100);
             doc.text('Invoice Number', 20, yPos);
-            doc.text('Invoice Date', 120, yPos);
+            doc.text('Issued', 120, yPos);
             yPos += 4;
 
             doc.setFontSize(9);
