@@ -1,0 +1,88 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Build Landing Page (Next.js)
+      - name: Install Landing dependencies
+        working-directory: src/landing
+        run: bun install
+
+      - name: Build Landing
+        working-directory: src/landing
+        run: bun run build
+
+      # Build QR Code Crafter (Vite)
+      - name: Install QR Code Crafter dependencies
+        working-directory: src/qr-code-crafter-src
+        run: npm install
+
+      - name: Build QR Code Crafter
+        working-directory: src/qr-code-crafter-src
+        run: npm run build
+
+      # Prepare deployment directory
+      - name: Prepare deployment
+        run: |
+          mkdir -p deploy
+          # Copy Next.js static export (excluding debug files)
+          find src/landing/out -name "*.txt" -delete
+          cp -r src/landing/out/* deploy/
+          # Copy QR Code Crafter
+          cp -r qr-code-crafter deploy/
+          # Copy other static projects
+          cp -r google-replica-TOP-master deploy/ 2>/dev/null || true
+          cp -r invoice-crafter deploy/ 2>/dev/null || true
+          cp -r rock-paper-scissor-game deploy/ 2>/dev/null || true
+          cp -r video-library deploy/ 2>/dev/null || true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

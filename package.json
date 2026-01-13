@@ -1,0 +1,10 @@
+{
+  "name": "vampishwolf-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "./scripts/build-all.sh",
+    "build:landing": "cd src/landing && bun install && bun run build",
+    "build:qr": "cd src/qr-code-crafter-src && npm install && npm run build"
+  }
+}

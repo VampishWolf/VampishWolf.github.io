@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 
 const projects = [
   {
@@ -67,21 +68,24 @@ function ProjectCard({ number, title, href, description, tags }: typeof projects
 
 export default function Home() {
   return (
-    <div className="max-w-[900px] mx-auto px-8 py-16 max-md:px-4 max-md:py-8">
-      <header className="mb-16 border-b border-zinc-700 pb-8">
-        <h1 className="text-4xl font-light tracking-tight mb-2 max-md:text-3xl">VampishWolf</h1>
-        <p className="text-base text-zinc-500 font-light">Web Developer / Creative Technologist</p>
-      </header>
+    <div className="relative min-h-screen overflow-hidden">
+      <BackgroundRippleEffect />
+      <div className="relative z-10 max-w-[900px] mx-auto px-8 py-16 max-md:px-4 max-md:py-8">
+        <header className="mb-16 border-b border-zinc-700 pb-8">
+          <h1 className="text-4xl font-light tracking-tight mb-2 max-md:text-3xl">VampishWolf</h1>
+          <p className="text-base text-zinc-500 font-light">Web Developer / Creative Technologist</p>
+        </header>
 
-      <div className="flex flex-col">
-        {projects.map((project) => (
-          <ProjectCard key={project.number} {...project} />
-        ))}
+        <div className="flex flex-col">
+          {projects.map((project) => (
+            <ProjectCard key={project.number} {...project} />
+          ))}
+        </div>
+
+        <footer className="mt-16 pt-8 border-t border-zinc-800 text-center text-zinc-600 text-sm">
+          <p>&copy; {new Date().getFullYear()} VampishWolf</p>
+        </footer>
       </div>
-
-      <footer className="mt-16 pt-8 border-t border-zinc-800 text-center text-zinc-600 text-sm">
-        <p>&copy; {new Date().getFullYear()} VampishWolf</p>
-      </footer>
     </div>
   );
 }
