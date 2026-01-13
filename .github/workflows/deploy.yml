@@ -45,9 +45,12 @@ jobs:
         run: bun run build
 
       # Build QR Code Crafter (Vite)
+      # Clean install to avoid npm optional dependencies bug with rollup
       - name: Install QR Code Crafter dependencies
         working-directory: src/qr-code-crafter-src
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build QR Code Crafter
         working-directory: src/qr-code-crafter-src
