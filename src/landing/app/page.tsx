@@ -83,6 +83,14 @@ export default function Home() {
         </div>
 
         <footer className="mt-16 pt-8 border-t border-zinc-800 text-center text-zinc-600 text-sm">
+          <p className="mb-2">
+            <a
+              href="mailto:ashish.mittal731@gmail.com"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              ashish.mittal731@gmail.com
+            </a>
+          </p>
           <p>&copy; {new Date().getFullYear()} VampishWolf</p>
         </footer>
       </div>
