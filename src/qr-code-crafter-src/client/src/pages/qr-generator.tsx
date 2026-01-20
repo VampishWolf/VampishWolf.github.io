@@ -1,155 +1,225 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import QRCodeStyling from "qr-code-styling";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  QrCode, 
-  Download, 
-  Edit, 
-  ExpandIcon, 
-  FileImage, 
-  Eye, 
-  Zap, 
-  Smartphone, 
-  Info, 
-  Link, 
-  Mail, 
-  Phone, 
-  Type,
+import {
+  QrCode,
+  Download,
+  Edit,
+  ExpandIcon,
+  FileImage,
+  Eye,
+  Info,
   CheckCircle
 } from "lucide-react";
+import { QRCustomizationPanel } from "@/components/qr-customization";
+import { Footer } from "@/components/Footer";
+import { DEFAULT_QR_STYLING_OPTIONS, type QRStylingOptions, type ColorConfig } from "@/types/qr-styling";
+
+// Helper function to convert ColorConfig to qr-code-styling format
+function colorConfigToQRStyling(config: ColorConfig) {
+  if (config.type === 'solid') {
+    return { color: config.color || '#000000' };
+  }
+
+  const gradient = config.gradient!;
+  return {
+    gradient: {
+      type: gradient.type,
+      rotation: gradient.rotation || 0,
+      colorStops: gradient.colorStops.map(stop => ({
+        offset: stop.offset,
+        color: stop.color
+      }))
+    }
+  };
+}
 
 export default function QRGenerator() {
   const [qrContent, setQrContent] = useState("https://example.com");
   const [qrSize, setQrSize] = useState("200");
-  const [qrFormat, setQrFormat] = useState("png");
+  const [qrFormat, setQrFormat] = useState<"png" | "jpeg">("png");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [qrGenerated, setQrGenerated] = useState(false);
   const [inputError, setInputError] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [stylingOptions, setStylingOptions] = useState<QRStylingOptions>(DEFAULT_QR_STYLING_OPTIONS);
   const { toast } = useToast();
 
-  // Dynamically import QRCode library
-  const generateQRCode = useCallback(async (text: string, size: number) => {
-    const QRCode = await import('qrcode');
-    return QRCode.toDataURL(text, {
-      width: size,
-      height: size,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
-  }, []);
+  const qrRef = useRef<HTMLDivElement>(null);
+  const qrCodeInstance = useRef<QRCodeStyling | null>(null);
 
   const validateInput = (text: string) => {
     if (!text || text.trim().length === 0) {
       return { valid: false, message: 'Please enter some content' };
     }
-    
+
     if (text.length > 1000) {
       return { valid: false, message: 'Content is too long (max 1000 characters)' };
     }
-    
+
     return { valid: true };
   };
 
-  const handleGenerateQRCode = useCallback(async () => {
+  const generateQRCode = useCallback(() => {
     const text = qrContent.trim();
     const validation = validateInput(text);
-    
+
     if (!validation.valid) {
-      setInputError(validation.message);
-      setQrDataUrl(null);
+      setInputError(validation.message || '');
+      setQrGenerated(false);
       return;
     }
-    
+
     setInputError("");
     setIsGenerating(true);
-    
-    try {
-      // Simulate slight delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const dataUrl = await generateQRCode(text, parseInt(qrSize));
-      setQrDataUrl(dataUrl);
-      
-    } catch (error) {
-      console.error('QR Code generation failed:', error);
-      setInputError('Failed to generate QR code. Please try again.');
-      setQrDataUrl(null);
-      toast({
-        title: "Generation Failed",
-        description: "Failed to generate QR code. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
+
+    // Use SVG for crisp rendering on all displays
+    const previewSize = 280;
+
+    const qrOptions = {
+      type: 'svg' as const,
+      width: previewSize,
+      height: previewSize,
+      data: text,
+      margin: 8,
+      dotsOptions: {
+        type: stylingOptions.dotsOptions.type,
+        ...colorConfigToQRStyling(stylingOptions.dotsOptions.color)
+      },
+      cornersSquareOptions: {
+        type: stylingOptions.cornersSquareOptions.type,
+        ...colorConfigToQRStyling(stylingOptions.cornersSquareOptions.color)
+      },
+      cornersDotOptions: {
+        type: stylingOptions.cornersDotOptions.type,
+        ...colorConfigToQRStyling(stylingOptions.cornersDotOptions.color)
+      },
+      backgroundOptions: colorConfigToQRStyling(stylingOptions.backgroundOptions.color)
+    };
+
+    // Always recreate the instance to handle gradient/solid switches properly
+    qrCodeInstance.current = new QRCodeStyling(qrOptions);
+
+    // Clear and re-append if ref exists
+    if (qrRef.current) {
+      qrRef.current.innerHTML = '';
+      qrCodeInstance.current.append(qrRef.current);
     }
-  }, [qrContent, qrSize, generateQRCode, toast]);
+
+    setIsGenerating(false);
+    setQrGenerated(true);
+  }, [qrContent, stylingOptions]);
+
+  // Append QR code to DOM when ref becomes available (for initial render)
+  useEffect(() => {
+    if (qrGenerated && qrRef.current && qrCodeInstance.current && qrRef.current.children.length === 0) {
+      qrCodeInstance.current.append(qrRef.current);
+    }
+  }, [qrGenerated]);
 
   // Real-time generation with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (qrContent.trim()) {
-        handleGenerateQRCode();
+        generateQRCode();
       } else {
-        setQrDataUrl(null);
+        setQrGenerated(false);
         setInputError("");
+        if (qrRef.current) {
+          qrRef.current.innerHTML = '';
+        }
+        qrCodeInstance.current = null;
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [qrContent, qrSize, handleGenerateQRCode]);
+  }, [qrContent, qrSize, stylingOptions, generateQRCode]);
 
   const handleDownload = async () => {
-    if (!qrDataUrl) return;
+    if (!qrGenerated) return;
 
     setIsDownloading(true);
-    
+
     try {
-      const link = document.createElement('a');
-      const filename = `qr-code-${Date.now()}.${qrFormat}`;
-      
+      const filename = `qr-code-${Date.now()}`;
+      const downloadSize = parseInt(qrSize);
+
+      // Create a new QR code instance at the user-selected size for download
+      const downloadQR = new QRCodeStyling({
+        width: downloadSize,
+        height: downloadSize,
+        data: qrContent.trim(),
+        margin: 8,
+        dotsOptions: {
+          type: stylingOptions.dotsOptions.type,
+          ...colorConfigToQRStyling(stylingOptions.dotsOptions.color)
+        },
+        cornersSquareOptions: {
+          type: stylingOptions.cornersSquareOptions.type,
+          ...colorConfigToQRStyling(stylingOptions.cornersSquareOptions.color)
+        },
+        cornersDotOptions: {
+          type: stylingOptions.cornersDotOptions.type,
+          ...colorConfigToQRStyling(stylingOptions.cornersDotOptions.color)
+        },
+        backgroundOptions: colorConfigToQRStyling(stylingOptions.backgroundOptions.color)
+      });
+
       if (qrFormat === 'jpeg') {
-        // Convert PNG to JPEG
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        
-        await new Promise((resolve) => {
-          img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            
-            // Fill with white background for JPEG
-            ctx!.fillStyle = 'white';
-            ctx!.fillRect(0, 0, canvas.width, canvas.height);
-            ctx!.drawImage(img, 0, 0);
-            
-            link.href = canvas.toDataURL('image/jpeg', 0.9);
-            resolve(null);
-          };
-          img.src = qrDataUrl;
-        });
+        // For JPEG, we need to get the canvas and convert with white background
+        const canvas = await downloadQR.getRawData('png');
+        if (canvas instanceof Blob) {
+          const img = new Image();
+          const url = URL.createObjectURL(canvas);
+
+          await new Promise((resolve, reject) => {
+            img.onload = () => {
+              const newCanvas = document.createElement('canvas');
+              const ctx = newCanvas.getContext('2d');
+              newCanvas.width = img.width;
+              newCanvas.height = img.height;
+
+              // Fill with white background for JPEG
+              ctx!.fillStyle = 'white';
+              ctx!.fillRect(0, 0, newCanvas.width, newCanvas.height);
+              ctx!.drawImage(img, 0, 0);
+
+              newCanvas.toBlob((blob) => {
+                if (blob) {
+                  const link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `${filename}.jpeg`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(link.href);
+                }
+                resolve(null);
+              }, 'image/jpeg', 0.9);
+
+              URL.revokeObjectURL(url);
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        }
       } else {
-        link.href = qrDataUrl;
+        await downloadQR.download({
+          name: filename,
+          extension: 'png'
+        });
       }
-      
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+
       toast({
         title: "Download Complete",
-        description: `QR code downloaded as ${filename}`,
+        description: `QR code downloaded as ${filename}.${qrFormat}`,
       });
-      
+
     } catch (error) {
       console.error('Download failed:', error);
       toast({
@@ -165,63 +235,67 @@ export default function QRGenerator() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">QR Code Generator</h1>
-            <p className="text-gray-600">Create professional QR codes instantly for any text or URL</p>
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">QR Code Generator</h1>
+              <p className="text-sm text-gray-600">Create professional QR codes instantly</p>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* QR Generator Form */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Input Section */}
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="qr-input" className="block text-sm font-medium text-gray-700 mb-2">
-                    <Edit className="inline mr-2 h-4 w-4 text-primary" />
-                    Enter Text or URL
-                  </Label>
-                  <Textarea
-                    id="qr-input"
-                    placeholder="Enter your text, URL, or any content to generate QR code..."
-                    className="w-full resize-none"
-                    rows={4}
-                    value={qrContent}
-                    onChange={(e) => setQrContent(e.target.value)}
-                  />
-                  {inputError && (
-                    <div className="mt-2 text-sm text-destructive flex items-center">
-                      <Info className="mr-1 h-4 w-4" />
-                      {inputError}
-                    </div>
-                  )}
-                </div>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex gap-6">
+          {/* Left Side - Options (Scrollable) */}
+          <div className="w-[60%] space-y-4 pb-8">
+            {/* Content Input */}
+            <Card>
+              <CardContent className="p-4">
+                <Label htmlFor="qr-input" className="block text-sm font-medium text-gray-700 mb-2">
+                  <Edit className="inline mr-2 h-4 w-4 text-primary" />
+                  Enter Text or URL
+                </Label>
+                <Textarea
+                  id="qr-input"
+                  placeholder="Enter your text, URL, or any content..."
+                  className="w-full resize-none"
+                  rows={3}
+                  value={qrContent}
+                  onChange={(e) => setQrContent(e.target.value)}
+                />
+                {inputError && (
+                  <div className="mt-2 text-sm text-destructive flex items-center">
+                    <Info className="mr-1 h-4 w-4" />
+                    {inputError}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                {/* QR Code Options */}
-                <div className="grid grid-cols-2 gap-4">
+            {/* Size & Format Options */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 gap-6">
                   {/* Size Selection */}
                   <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-3">
                       <ExpandIcon className="inline mr-2 h-4 w-4 text-primary" />
-                      Size
+                      Download Size
                     </Label>
                     <RadioGroup value={qrSize} onValueChange={setQrSize} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="200" id="size-200" />
-                        <Label htmlFor="size-200" className="text-sm">Small (200x200)</Label>
+                        <Label htmlFor="size-200" className="text-sm">Small (200px)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="300" id="size-300" />
-                        <Label htmlFor="size-300" className="text-sm">Medium (300x300)</Label>
+                        <Label htmlFor="size-300" className="text-sm">Medium (300px)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="400" id="size-400" />
-                        <Label htmlFor="size-400" className="text-sm">Large (400x400)</Label>
+                        <Label htmlFor="size-400" className="text-sm">Large (400px)</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -232,186 +306,93 @@ export default function QRGenerator() {
                       <FileImage className="inline mr-2 h-4 w-4 text-primary" />
                       Format
                     </Label>
-                    <RadioGroup value={qrFormat} onValueChange={setQrFormat} className="space-y-2">
+                    <RadioGroup value={qrFormat} onValueChange={(v) => setQrFormat(v as "png" | "jpeg")} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="png" id="format-png" />
-                        <Label htmlFor="format-png" className="text-sm">PNG</Label>
+                        <Label htmlFor="format-png" className="text-sm">PNG (transparent)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="jpeg" id="format-jpeg" />
-                        <Label htmlFor="format-jpeg" className="text-sm">JPEG</Label>
+                        <Label htmlFor="format-jpeg" className="text-sm">JPEG (white bg)</Label>
                       </div>
                     </RadioGroup>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Generate Button */}
-                <Button 
-                  onClick={handleGenerateQRCode}
-                  className="w-full bg-primary hover:bg-blue-700 text-white font-medium"
-                  disabled={isGenerating}
-                >
-                  <QrCode className="mr-2 h-4 w-4" />
-                  {isGenerating ? "Generating..." : "Generate QR Code"}
-                </Button>
-              </div>
+            {/* QR Customization Panel */}
+            <Card>
+              <CardContent className="p-4">
+                <Label className="block text-sm font-medium text-gray-700 mb-3">
+                  <QrCode className="inline mr-2 h-4 w-4 text-primary" />
+                  Design Customization
+                </Label>
+                <QRCustomizationPanel
+                  options={stylingOptions}
+                  onChange={setStylingOptions}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Preview Section */}
-              <div className="flex flex-col items-center">
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    <Eye className="inline mr-2 h-5 w-5 text-primary" />
-                    Preview
-                  </h3>
-                  <p className="text-sm text-gray-600">Your QR code will appear here</p>
-                </div>
+          {/* Right Side - Preview (Fixed) */}
+          <div className="w-[40%]">
+            <div className="sticky top-24">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      <Eye className="inline mr-2 h-5 w-5 text-primary" />
+                      Preview & Download
+                    </h3>
+                  </div>
 
-                {/* QR Code Display Area */}
-                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 w-full max-w-sm aspect-square flex items-center justify-center mb-6">
-                  {isGenerating ? (
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4 mx-auto"></div>
-                      <p className="text-gray-600">Generating QR Code...</p>
-                    </div>
-                  ) : qrDataUrl ? (
-                    <div>
-                      <img 
-                        src={qrDataUrl} 
-                        alt="Generated QR Code" 
-                        className="max-w-full h-auto rounded-lg shadow-sm"
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <QrCode className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
-                      <p className="text-gray-500">QR Code will appear here</p>
+                  {/* QR Code Display Area */}
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg p-4 min-h-[300px] flex items-center justify-center mb-4">
+                    {isGenerating ? (
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-3 mx-auto"></div>
+                        <p className="text-sm text-gray-600">Generating...</p>
+                      </div>
+                    ) : qrGenerated ? (
+                      <div ref={qrRef} className="flex items-center justify-center [&>svg]:max-w-full [&>svg]:h-auto" />
+                    ) : (
+                      <div className="text-center">
+                        <QrCode className="h-12 w-12 text-gray-300 mb-3 mx-auto" />
+                        <p className="text-sm text-gray-400">QR code preview</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Download Button */}
+                  {qrGenerated && (
+                    <div className="space-y-3">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-center text-green-700 text-sm">
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          <span className="font-medium">Ready to download</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleDownload}
+                        className="w-full bg-accent hover:bg-green-600 text-white font-medium"
+                        disabled={isDownloading}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        {isDownloading ? "Downloading..." : `Download ${qrFormat.toUpperCase()}`}
+                      </Button>
                     </div>
                   )}
-                </div>
-
-                {/* Download Section */}
-                {qrDataUrl && (
-                  <div className="w-full max-w-sm">
-                    <div className="bg-accent/10 rounded-lg p-4 mb-4">
-                      <div className="flex items-center text-accent mb-2">
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        <span className="font-medium">QR Code Generated Successfully!</span>
-                      </div>
-                      <p className="text-sm text-gray-600">Ready to download in your selected format</p>
-                    </div>
-
-                    <Button 
-                      onClick={handleDownload}
-                      className="w-full bg-accent hover:bg-green-600 text-white font-medium"
-                      disabled={isDownloading}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      {isDownloading ? "Downloading..." : "Download QR Code"}
-                    </Button>
-                  </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Feature Highlights */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Zap className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Instant Generation</h3>
-              <p className="text-sm text-gray-600">Generate QR codes instantly as you type with real-time preview</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Smartphone className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Mobile Friendly</h3>
-              <p className="text-sm text-gray-600">Fully responsive design that works perfectly on all devices</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Download className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Multiple Formats</h3>
-              <p className="text-sm text-gray-600">Download in PNG or JPEG format with customizable sizes</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Usage Instructions */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              <Info className="inline mr-2 h-5 w-5 text-primary" />
-              How to Use
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium text-gray-900 mb-3">Supported Content Types:</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-center">
-                    <Link className="text-primary mr-2 h-4 w-4" />
-                    Website URLs (http://example.com)
-                  </li>
-                  <li className="flex items-center">
-                    <Mail className="text-primary mr-2 h-4 w-4" />
-                    Email addresses (mailto:user@example.com)
-                  </li>
-                  <li className="flex items-center">
-                    <Phone className="text-primary mr-2 h-4 w-4" />
-                    Phone numbers (tel:+1234567890)
-                  </li>
-                  <li className="flex items-center">
-                    <Type className="text-primary mr-2 h-4 w-4" />
-                    Plain text and messages
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900 mb-3">Simple Steps:</h3>
-                <ol className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start">
-                    <span className="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5 flex-shrink-0">1</span>
-                    Enter your text or URL in the input field
-                  </li>
-                  <li className="flex items-start">
-                    <span className="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5 flex-shrink-0">2</span>
-                    Choose your preferred size and format
-                  </li>
-                  <li className="flex items-start">
-                    <span className="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5 flex-shrink-0">3</span>
-                    Click generate to create your QR code
-                  </li>
-                  <li className="flex items-start">
-                    <span className="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5 flex-shrink-0">4</span>
-                    Download your QR code and use it anywhere
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center text-gray-600">
-            <p className="mb-2">© 2024 QR Code Generator. Built with modern web technologies.</p>
-            <p className="text-sm">Free QR code generation tool for personal and commercial use.</p>
           </div>
         </div>
-      </footer>
+      </div>
+
+      <Footer />
     </div>
   );
 }
