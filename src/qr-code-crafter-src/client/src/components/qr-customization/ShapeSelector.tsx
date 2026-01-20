@@ -27,7 +27,7 @@ export function ShapeSelector<T extends string>({
 }: ShapeSelectorProps<T>) {
   return (
     <TooltipProvider delayDuration={200}>
-      <div className={cn("flex flex-wrap gap-1", className)}>
+      <div className={cn("flex flex-wrap gap-1 justify-center", className)}>
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
