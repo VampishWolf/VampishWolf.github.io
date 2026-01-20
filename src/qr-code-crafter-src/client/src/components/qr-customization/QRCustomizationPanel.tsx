@@ -41,9 +41,7 @@ export function QRCustomizationPanel({ options, onChange }: QRCustomizationPanel
         onDotsColorChange={(color) =>
           onChange({
             ...options,
-            dotsOptions: { ...options.dotsOptions, color },
-            cornersSquareOptions: { ...options.cornersSquareOptions, color },
-            cornersDotOptions: { ...options.cornersDotOptions, color }
+            dotsOptions: { ...options.dotsOptions, color }
           })
         }
         onCornersColorChange={(color) =>

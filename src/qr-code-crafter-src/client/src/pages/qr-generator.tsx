@@ -171,10 +171,61 @@ export default function QRGenerator() {
         backgroundOptions: colorConfigToQRStyling(stylingOptions.backgroundOptions.color)
       });
 
-      await downloadQR.download({
-        name: filename,
-        extension: qrFormat
-      });
+      // Get raw SVG and add rounded corners to background
+      const svgData = await downloadQR.getRawData('svg');
+      if (svgData instanceof Blob) {
+        const svgText = await svgData.text();
+        // Add rx and ry attributes to the first rect (background)
+        const cornerRadius = Math.round(downloadSize * 0.05); // 5% of size
+        const modifiedSvg = svgText.replace(
+          /<rect([^>]*)(width="[^"]*"[^>]*height="[^"]*")([^>]*)\/>/,
+          `<rect$1$2$3 rx="${cornerRadius}" ry="${cornerRadius}"/>`
+        );
+
+        if (qrFormat === 'svg') {
+          const blob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${filename}.svg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else {
+          // Convert SVG to PNG
+          const img = new Image();
+          const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(svgBlob);
+
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = downloadSize;
+              canvas.height = downloadSize;
+              const ctx = canvas.getContext('2d')!;
+              ctx.drawImage(img, 0, 0);
+
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  const pngUrl = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = pngUrl;
+                  link.download = `${filename}.png`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(pngUrl);
+                }
+                URL.revokeObjectURL(url);
+                resolve();
+              }, 'image/png');
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        }
+      }
 
       toast({
         title: "Download Complete",
